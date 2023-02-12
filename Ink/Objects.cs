@@ -193,6 +193,16 @@ namespace Ink
             }
         }
 
+        protected static Dictionary<string, string> ClonePropertyValues(InkObject inkObject)
+        {
+            Dictionary<string, string> propertyValues = new(inkObject.Properties.Count);
+            foreach (KeyValuePair<string, InkProperty> item in inkObject.Properties)
+            {
+                propertyValues.Add(item.Key, item.Value.Value);
+            }
+            return propertyValues;
+        }
+
         public string Name
         {
             get { return name; }
