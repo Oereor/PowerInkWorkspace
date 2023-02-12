@@ -1,0 +1,132 @@
+﻿<Window x:Class="Ink.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Ink"
+        xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+        mc:Ignorable="d"
+        Title="Ink Workspace" Height="800" Width="1400" WindowState="Maximized" Icon="/PowerInk.png" >
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="19*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="70"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="17*"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="10"/>
+            <ColumnDefinition Width="4*"/>
+            <ColumnDefinition Width="10"/>
+        </Grid.ColumnDefinitions>
+        <Menu Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="5">
+            <MenuItem Header="File">
+                <MenuItem Header="New" Click="MenuItem_File_New_Click"/>
+                <MenuItem Header="New window" Click="MenuItem_File_NewWindow_Click"/>
+                <Separator/>
+                <MenuItem Header="Exit" Click="MenuItem_File_Exit_Click"/>
+            </MenuItem>
+            <MenuItem Header="Page">
+                <MenuItem Header="Background colour">
+                    <MenuItem Header="White" Click="MenuItems_BackgroundColour_Click"/>
+                    <MenuItem Header="Black" Click="MenuItems_BackgroundColour_Click"/>
+                    <MenuItem Header="Grey" Click="MenuItems_BackgroundColour_Click"/>
+                    <MenuItem Header="Red" Click="MenuItems_BackgroundColour_Click"/>
+                    <MenuItem Header="Orange" Click="MenuItems_BackgroundColour_Click"/>
+                    <MenuItem Header="Yellow" Click="MenuItems_BackgroundColour_Click"/>
+                    <MenuItem Header="Green" Click="MenuItems_BackgroundColour_Click"/>
+                    <MenuItem Header="Blue" Click="MenuItems_BackgroundColour_Click"/>
+                    <MenuItem Header="Purple" Click="MenuItems_BackgroundColour_Click"/>
+                    <Separator/>
+                    <MenuItem Header="Customize" Click="MenuItem_CustomizeBackground_Click"/>
+                </MenuItem>
+                <MenuItem Header="Background image" Click="MenuItem_BackgroundImage_Click"/>
+                <MenuItem Header="Reset background" Click="MenuItem_ResetBackground_Click" />
+                <Separator/>
+                <MenuItem Header="Show guides" IsCheckable="True" IsChecked="True" Checked="MenuItem_Guides_Checked" Unchecked="MenuItem_Guides_Unchecked"/>
+                <MenuItem Header="Show border around selected object" IsCheckable="True" IsChecked="True" Checked="MenuItem_SelectionBorder_Checked" Unchecked="MenuItem_SelectionBorder_Unchecked"/>
+            </MenuItem>
+            <MenuItem Header="Object">
+                <MenuItem Header="New text box" Click="MenuItem_NewTextBox_Click" />
+                <MenuItem Header="New image box" Click="MenuItem_NewImageBox_Click" />
+                <MenuItem Header="New line" Click="MenuItem_NewInkShape_Click"/>
+                <MenuItem Header="New ellipse" Click="MenuItem_NewInkShape_Click"/>
+                <MenuItem Header="New rectangle" Click="MenuItem_NewInkShape_Click"/>
+                <MenuItem Header="New sketchpad" Click="MenuItem_NewSketchpad_Click"/>
+                <Separator/>
+                <MenuItem Header="Remove all text boxes on page" Click="MenuItem_RemoveAllTextBoxes_Click"/>
+                <MenuItem Header="Remove all image boxes on page" Click="MenuItem_RemoveAllImageBoxes_Click"/>
+            </MenuItem>
+            <MenuItem x:Name="menuItem_Property" Header="Property">
+                <MenuItem Header="View value history" Click="MenuItem_ViewValueHistory_Click"/>
+                <MenuItem Header="Clear value history" Click="MenuItem_ClearValueHistory_Click" />
+                <Separator/>
+                <MenuItem x:Name="menuItem_ResetSelectedProperty" Header="Reset value and disable value sync of selected property " Click="MenuItem_ResetSelectedProperty_Click"/>
+                <MenuItem x:Name="menuItem_ResetAllProperties" Header="Reset values and disable values sync of all properties" Click="MenuItem_ResetAllProperties_Click"/>
+            </MenuItem>
+            <MenuItem Header="Code">
+                <MenuItem Header="Open new code editor window"/>
+                <Separator/>
+                <MenuItem Header="Run submitted code"/>
+            </MenuItem>
+            <MenuItem Header="Colour">
+                <MenuItem Header="RGB visualizer" Click="MenuItem_RGBVisualizer_Click"/>
+            </MenuItem>
+        </Menu>
+        <Canvas x:Name="canvas_Page" Grid.Row="1" Grid.Column="0" Panel.ZIndex="-2" >
+            <GridSplitter x:Name="gridSplitter_Horizontal" IsEnabled="False" Width="{Binding ElementName=canvas_Page,Path=ActualWidth}" Height="2" Canvas.Top="{Binding ElementName=slider_Y,Path=Value}" Visibility="Visible" Opacity="1"/>
+            <GridSplitter x:Name="gridSplitter_Vertical" IsEnabled="False" Width="2" Height="{Binding ElementName=canvas_Page,Path=ActualHeight}" Canvas.Left="{Binding ElementName=slider_X,Path=Value}" Visibility="Visible" Opacity="1"/>
+            <Border x:Name="border_SelectionBorder" BorderBrush="Teal" BorderThickness="1"/>
+        </Canvas>
+        <Canvas x:Name="canvas_PropertiesPanel" Grid.Row="1" Grid.RowSpan="3" Grid.Column="3" Panel.ZIndex="0">
+            <ComboBox x:Name="comboBox_Objects" Style="{StaticResource MaterialDesignOutlinedComboBox}" md:ComboBoxAssist.ShowSelectedItem="False" md:HintAssist.Hint="Object" md:HintAssist.IsFloating="True" Width="{Binding ElementName=canvas_PropertiesPanel,Path=ActualWidth}" Canvas.Top="5" SelectionChanged="ComboBox_Objects_SelectionChanged" DropDownOpened="ComboBox_Objects_DropDownOpened">
+                <ComboBox.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Remove selected object" Click="MenuItem_RemoveSelectedObject_Click"/>
+                        <MenuItem Header="Clear all objects on this page" Click="MenuItem_ClearAllObjectsOnPage_Click"/>
+                    </ContextMenu>
+                </ComboBox.ContextMenu>
+            </ComboBox>
+            <TextBox x:Name="textBox_Name" md:HintAssist.Hint="Name" md:HintAssist.IsFloating="True" md:HintAssist.HelperText="Update of name takes effect on next time selected. " md:TextFieldAssist.HasClearButton="True" Canvas.Top="51" Width="{Binding ElementName=canvas_PropertiesPanel,Path=ActualWidth}" LostFocus="TextBox_Name_LostFocus"/>
+            <GroupBox x:Name="groupBox_Type" Header="Object" Canvas.Top="105" Width="{Binding ElementName=canvas_PropertiesPanel,Path=ActualWidth}">
+                <StackPanel>
+                    <TextBox x:Name="textBox_X" md:HintAssist.Hint="X" md:HintAssist.IsFloating="True" Width="{Binding ElementName=canvas_PropertiesPanel,Path=ActualWidth}"/>
+                    <TextBox x:Name="textBox_Y" md:HintAssist.Hint="Y" md:HintAssist.IsFloating="True" Width="{Binding ElementName=canvas_PropertiesPanel,Path=ActualWidth}"/>
+                    <TextBox x:Name="textBox_Width" md:HintAssist.Hint="Width" md:HintAssist.IsFloating="True" Width="{Binding ElementName=canvas_PropertiesPanel,Path=ActualWidth}"/>
+                    <TextBox x:Name="textBox_Height" md:HintAssist.Hint="Height" md:HintAssist.IsFloating="True" Width="{Binding ElementName=canvas_PropertiesPanel,Path=ActualWidth}"/>
+                </StackPanel>
+            </GroupBox>
+            <CheckBox x:Name="checkBox_Visible" Content="Visible" Canvas.Top="310"/>
+            <CheckBox x:Name="checkBox_SyncProperty" Canvas.Top="340" Width="{Binding ElementName=canvas_PropertiesPanel,Path=ActualWidth}" Visibility="Hidden" Click="CheckBox_SyncProperty_Click" Checked="CheckBox_SyncProperty_Checked" Unchecked="CheckBox_SyncProperty_Unchecked"/>
+            <ComboBox x:Name="comboBox_SyncPropertyWithObject" Canvas.Top="325" Canvas.Left="22" md:HintAssist.Hint="Sync the value of selected property with" md:HintAssist.IsFloating="True" md:HintAssist.HelperText="Unckeck the checkbox to change. " IsEnabled="True" Visibility="Hidden" DropDownOpened="ComboBox_SyncPropertyWithObject_DropDownOpened" SelectionChanged="ComboBox_SyncPropertyWithObject_SelectionChanged" DropDownClosed="ComboBox_SyncPropertyWithObject_DropDownClosed"/>
+            <GroupBox x:Name="groupBox_Properties" Header="PROPERTIES" Canvas.Top="385" Width="{Binding ElementName=canvas_PropertiesPanel,Path=ActualWidth}" Height="170" Visibility="Hidden">
+                <ListBox x:Name="list_Properties" MaxHeight="{Binding ElementName=groupBox_Properties,Path=ActualHeight}" SelectionChanged="List_Properties_SelectionChanged"/>
+            </GroupBox>
+            <TextBox x:Name="textBox_PropertyValue" Style="{StaticResource MaterialDesignOutlinedTextBox}" md:HintAssist.Hint="Property Value" md:HintAssist.IsFloating="True" md:TextFieldAssist.HasClearButton="True" Canvas.Top="565" Width="{Binding ElementName=canvas_PropertiesPanel,Path=ActualWidth}" Visibility="Hidden" AcceptsReturn="True" MaxHeight="140"/>
+            <ComboBox x:Name="comboBox_PropertyValue" Style="{StaticResource MaterialDesignOutlinedComboBox}" md:HintAssist.Hint="Property Value" md:HintAssist.IsFloating="True"  Canvas.Top="565" Width="{Binding ElementName=canvas_PropertiesPanel,Path=ActualWidth}" Visibility="Hidden" SelectionChanged="ComboBox_PropertyValue_SelectionChanged"/>
+            <CheckBox x:Name="checkBox_PropertyValue" Canvas.Top="565" Content="Property Value" Visibility="Hidden"/>
+        </Canvas>
+        <Slider x:Name="slider_X" Grid.Row="2" Grid.Column="0" Panel.ZIndex="1" Width="{Binding ElementName=canvas_Page,Path=ActualWidth}" Maximum="{Binding ElementName=canvas_Page,Path=ActualWidth}" Visibility="Hidden"/>
+        <Slider x:Name="slider_Y" Grid.Row="1" Grid.Column="1" Panel.ZIndex="1" IsDirectionReversed="True" Orientation="Vertical" Height="{Binding ElementName=canvas_Page,Path=ActualHeight}" Maximum="{Binding ElementName=canvas_Page,Path=ActualHeight}" Visibility="Hidden"/>
+        <ToolBar Grid.Row="3" Grid.Column="0">
+            <ComboBox x:Name="comboBox_Pages" Style="{StaticResource MaterialDesignOutlinedComboBox}" md:HintAssist.Hint="Current Page" md:HintAssist.IsFloating="True" md:ComboBoxAssist.ShowSelectedItem="False" SelectionChanged="ComboBox_Pages_SelectionChanged" />
+            <Separator/>
+            <Button Style="{StaticResource MaterialDesignFlatButton}" Content="Add" Click="Button_AddPage_Click"/>
+            <Button Style="{StaticResource MaterialDesignFlatButton}" Content="Remove" Click="Button_RemovePage_Click"/>
+            <Button Style="{StaticResource MaterialDesignFlatButton}" Content="Remove all" Click="Button_RemoveAllPages_Click"/>
+            <Separator/>
+            <Button Style="{StaticResource MaterialDesignFlatButton}" Content="Rename" Click="Button_RenamePage_Click"/>
+            <TextBox x:Name="textBox_PageRename" MinWidth="250" md:HintAssist.HelperText="Update of name takes effect on next time selected. " md:HintAssist.Hint="Page Name" md:HintAssist.IsFloating="True" Visibility="Collapsed" LostFocus="TextBox_PageRename_LostFocus" LostKeyboardFocus="TextBox_PageRename_LostKeyboardFocus"/>
+        </ToolBar>
+        <Popup x:Name="popup_PropertyValueHistory" AllowsTransparency="False" PopupAnimation="Fade" PlacementTarget="{Binding ElementName=menuItem_Property}" StaysOpen="False" Opened="Popup_PropertyValueHistory_Opened" >
+            <StackPanel Background="White">
+                <Separator/>
+                <ComboBox x:Name="comboBox_PropertyValueHistory" Style="{StaticResource MaterialDesignOutlinedComboBox}" md:HintAssist.Hint="Value History" md:HintAssist.IsFloating="True"/>
+                <Separator/>
+                <Button x:Name="button_RestorePropertyValue" Style="{StaticResource MaterialDesignFlatButton}" Content="Restore" Click="Button_RestorePropertyValue_Click" />
+            </StackPanel>
+        </Popup>
+    </Grid>
+</Window>
