@@ -759,6 +759,14 @@ namespace Ink
             InkSketchpad inkSketchpad = new($"Sketchpad{sketchpadCounter++}");
             AddNewInkObject(inkSketchpad);
         }
+
+        private void MenuItem_CloneObject_Click(object sender, RoutedEventArgs e)
+        {
+            if (comboBox_Objects.SelectedItem is InkObject selectedObject)
+            {
+                AddNewInkObject(InkObject.CreateClone(selectedObject));
+            }
+        }
     }
 
     public partial class MainWindow : Window

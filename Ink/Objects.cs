@@ -172,6 +172,27 @@ namespace Ink
     {
         private string name = "InkObject";
 
+        public static InkObject CreateClone(InkObject source)
+        {
+            string cloneName = $"{source.Name}_Clone";
+            InkObject clone = source switch
+            {
+                InkTextBox => new InkTextBox(cloneName),
+                InkImageBox => new InkImageBox(cloneName),
+                InkEllipse => new InkEllipse(cloneName),
+                InkRectangle => new InkRectangle(cloneName),
+                InkLine => new InkLine(cloneName),
+                InkSketchpad => new InkSketchpad(cloneName),
+                _ => throw new ArgumentException("Cannot create a clone of given source. ", nameof(source))
+            };
+            Dictionary<string, string> propertyValues = ClonePropertyValues(source);
+            foreach (KeyValuePair<string,string> propertyKeysValues in propertyValues)
+            {
+                clone.Properties[propertyKeysValues.Key].Value = propertyKeysValues.Value;
+            }
+            return clone;
+        }
+
         protected static Color GetColourFromRgbString(string rgb)
         {
             Regex regex = RgbRegex();
