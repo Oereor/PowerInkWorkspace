@@ -591,11 +591,10 @@ namespace Ink
         private void MenuItem_NewImageBox_Click(object sender, RoutedEventArgs e)
         {
             InkImageBox inkImageBox = new($"ImageBox{imageBoxCounter++}");
-            inkImageBox.MouseRightButtonUp += InkImageBox_MouseRightButtonDown;
             AddNewInkObject(inkImageBox);
         }
 
-        private void InkImageBox_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        private void InkImageBox_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
         {
             OpenFileDialog openFileDialog = new()
             {
@@ -748,6 +747,10 @@ namespace Ink
             inkObject.AddToPage(canvas_Page);
             inkObject.Click += InkObject_Click;
             inkObject.PropertyChanged += InkObject_PositionChanged;
+            if (inkObject is InkImageBox inkImageBox)
+            {
+                inkImageBox.MouseRightButtonUp += InkImageBox_MouseRightButtonUp;
+            }
             comboBox_Objects.SelectedIndex = comboBox_Objects.Items.Count - 1;
         }
 
