@@ -85,7 +85,7 @@
                 <ComboBox.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="Clone" Click="MenuItem_CloneObject_Click"/>
-                        <MenuItem Header="Clone &amp; link to this object"/>
+                        <MenuItem Header="Clone &amp; link to this object" Click="MenuItem_CloneAndLinkObject_Click"/>
                         <Separator/>
                         <MenuItem Header="Remove selected object" Click="MenuItem_RemoveSelectedObject_Click"/>
                         <MenuItem Header="Clear all objects on this page" Click="MenuItem_ClearAllObjectsOnPage_Click"/>

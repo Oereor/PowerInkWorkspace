@@ -767,11 +767,26 @@ namespace Ink
                 AddNewInkObject(InkObject.CreateClone(selectedObject));
             }
         }
+
+        private void MenuItem_CloneAndLinkObject_Click(object sender, RoutedEventArgs e)
+        {
+            if (comboBox_Objects.SelectedItem is InkObject selectedObject)
+            {
+                int selectedIndex = comboBox_Objects.SelectedIndex;
+                InkObject clone = InkObject.CreateClone(selectedObject);
+                foreach (KeyValuePair<string, InkProperty> keyValuePair in clone.Properties)
+                {
+                    keyValuePair.Value.SyncValueWith(selectedObject.Properties[keyValuePair.Key], selectedObject);
+                }
+                AddNewInkObject(clone);
+                comboBox_Objects.SelectedIndex = selectedIndex;
+            }
+        }
     }
 
     public partial class MainWindow : Window
     {
-        private int pageCounter = 1, textBoxCounter = 1, imageBoxCounter = 1, 
+        private int pageCounter = 1, textBoxCounter = 1, imageBoxCounter = 1,
             ellipseCounter = 1, rectangleCounter = 1, lineCounter = 1, sketchpadCounter = 1;
         private readonly ObservableCollection<InkPage> pages;
         private InkPage currentPage;
