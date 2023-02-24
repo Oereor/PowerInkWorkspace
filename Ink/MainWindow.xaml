@@ -63,8 +63,8 @@
                 <MenuItem Header="View value history" Click="MenuItem_ViewValueHistory_Click"/>
                 <MenuItem Header="Clear value history" Click="MenuItem_ClearValueHistory_Click" />
                 <Separator/>
-                <MenuItem x:Name="menuItem_ResetSelectedProperty" Header="Reset value and disable value sync of selected property " Click="MenuItem_ResetSelectedProperty_Click"/>
-                <MenuItem x:Name="menuItem_ResetAllProperties" Header="Reset values and disable values sync of all properties" Click="MenuItem_ResetAllProperties_Click"/>
+                <MenuItem x:Name="menuItem_ResetSelectedProperty" Header="Reset value &amp; disable value sync of selected property " Click="MenuItem_ResetSelectedProperty_Click"/>
+                <MenuItem x:Name="menuItem_ResetAllProperties" Header="Reset values &amp; disable values sync of all properties" Click="MenuItem_ResetAllProperties_Click"/>
             </MenuItem>
             <MenuItem Header="Code">
                 <MenuItem Header="Open new code editor window"/>
@@ -85,6 +85,7 @@
                 <ComboBox.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="Clone" Click="MenuItem_CloneObject_Click"/>
+                        <MenuItem Header="Clone &amp; link to this object"/>
                         <Separator/>
                         <MenuItem Header="Remove selected object" Click="MenuItem_RemoveSelectedObject_Click"/>
                         <MenuItem Header="Clear all objects on this page" Click="MenuItem_ClearAllObjectsOnPage_Click"/>
