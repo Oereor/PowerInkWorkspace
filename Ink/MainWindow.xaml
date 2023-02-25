@@ -66,7 +66,7 @@
                 <MenuItem x:Name="menuItem_ResetSelectedProperty" Header="Reset value &amp; disable value sync of selected property " Click="MenuItem_ResetSelectedProperty_Click"/>
                 <MenuItem x:Name="menuItem_ResetAllProperties" Header="Reset values &amp; disable values sync of all properties" Click="MenuItem_ResetAllProperties_Click"/>
             </MenuItem>
-            <MenuItem Header="Code">
+            <MenuItem Header="Code" IsEnabled="False">    <!--开发未完成-->
                 <MenuItem Header="Open new code editor window"/>
                 <Separator/>
                 <MenuItem Header="Run submitted code"/>

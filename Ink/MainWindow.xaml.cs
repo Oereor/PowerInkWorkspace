@@ -773,12 +773,7 @@ namespace Ink
             if (comboBox_Objects.SelectedItem is InkObject selectedObject)
             {
                 int selectedIndex = comboBox_Objects.SelectedIndex;
-                InkObject clone = InkObject.CreateClone(selectedObject);
-                foreach (KeyValuePair<string, InkProperty> keyValuePair in clone.Properties)
-                {
-                    keyValuePair.Value.SyncValueWith(selectedObject.Properties[keyValuePair.Key], selectedObject);
-                }
-                AddNewInkObject(clone);
+                AddNewInkObject(InkObject.CreateLinkedClone(selectedObject));
                 comboBox_Objects.SelectedIndex = selectedIndex;
             }
         }

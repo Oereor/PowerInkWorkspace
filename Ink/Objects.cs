@@ -193,6 +193,23 @@ namespace Ink
             return clone;
         }
 
+        public static InkObject CreateLinkedClone(InkObject source)
+        {
+            try
+            {
+                InkObject clone = CreateClone(source);
+                foreach (KeyValuePair<string, InkProperty> keyValuePair in clone.Properties)
+                {
+                    keyValuePair.Value.SyncValueWith(source.Properties[keyValuePair.Key], source);
+                }
+                return clone;
+            }
+            catch (ArgumentException)
+            {
+                throw;
+            }
+        }
+
         protected static Color GetColourFromRgbString(string rgb)
         {
             Regex regex = RgbRegex();
