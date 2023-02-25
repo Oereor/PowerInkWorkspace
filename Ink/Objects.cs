@@ -17,15 +17,31 @@ namespace Ink
     /* 指定属性值的类型 */
     public enum InkPropertyValueType
     {
+        /// <summary>
+        /// Value is a boolean. 
+        /// </summary>
         Boolean,    // 显示为一个CheckBox
+        /// <summary>
+        /// Value is picked from a given list. 
+        /// </summary>
         List,   // 给定值列表，显示为ComboBox
+        /// <summary>
+        /// Value is given by the user. 
+        /// </summary>
         Input   // 用户自行输入，显示为TextBox
     }
 
     /* InkProperty类中InkPropertyValueChanged事件的EventArgs */
     public class InkPropertyValueChangedEventArgs : EventArgs
     {
+        /// <summary>
+        /// Name of the property that has been changed. 
+        /// </summary>
         public string PropertyName { get; } // 值发生改变的属性名称
+
+        /// <summary>
+        /// Value of the property after changing. 
+        /// </summary>
         public string NewValue { get; } // 改变后的属性值
         public InkPropertyValueType ValueType { get; }
 
@@ -58,6 +74,10 @@ namespace Ink
             }
         }
         public ObservableCollection<string> ValueHistory { get; } = new();   // 用于实现回溯属性值
+
+        /// <summary>
+        /// The source property to sync with. 
+        /// </summary>
         public InkProperty? ValueSource
         {
             get { return valueSource; }
@@ -67,6 +87,10 @@ namespace Ink
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ValueSource)));
             }
         }
+
+        /// <summary>
+        /// The <see cref="InkObject"/> instance which contains the <see cref="ValueSource"/> instance. 
+        /// </summary>
         public InkObject? ValueSourceObject
         {
             get { return valueSourceObject; }
@@ -76,12 +100,24 @@ namespace Ink
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ValueSourceObject)));
             }
         }
+        /// <summary>
+        /// Indicates the type of this <see cref="InkProperty"/> instance. 
+        /// </summary>
         public InkPropertyValueType ValueType { get; }
         public string DefaultValue { get; }
+        /// <summary>
+        /// This property should be set only if <see cref="ValueType"/> is <see cref="InkPropertyValueType.List"/>; in other cases, just remain <see langword="null"/>. 
+        /// </summary>
         public string[]? ValueList { get; init; }   // 若ValueType是List，该列表存储给定的属性值；否则为null
         public bool ValueSyncEnabled { get; private set; }
 
+        /// <summary>
+        /// Implements <see cref="INotifyPropertyChanged"/> interface. 
+        /// </summary>
         public event PropertyChangedEventHandler? PropertyChanged;  // 实现INotifyPropertyChanged接口
+        /// <summary>
+        /// Used for value sync. 
+        /// </summary>
         public event InkPropertyValueChangedEventHandler? InkPropertyValueChanged;  // 自定义用于同步属性值的事件
 
         public InkProperty(string name, InkPropertyValueType valueType, string defaultValue)
@@ -102,11 +138,15 @@ namespace Ink
             }
         }
 
-        public void RestoreValue(int index)
+        /// <summary>
+        /// This operation won't be added to <see cref="ValueHistory"/>. 
+        /// </summary>
+        /// <param name="value">The value to be restored</param>
+        public void RestoreValue(string value)
         {
-            if (index < ValueHistory.Count)
+            if (ValueHistory.Contains(value))
             {
-                SetValue(ValueHistory[index], false);
+                SetValue(value, false);
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value)));
                 InkPropertyValueChanged?.Invoke(this, new InkPropertyValueChangedEventArgs(Name, Value, ValueType));
             }
@@ -172,6 +212,12 @@ namespace Ink
     {
         private string name = "InkObject";
 
+        /// <summary>
+        /// Creates a new instance of <see cref="InkObject"/> based on the given one. 
+        /// </summary>
+        /// <param name="source">The object to be cloned</param>
+        /// <returns>A new instance of <see cref="InkObject"/>. </returns>
+        /// <exception cref="ArgumentException"></exception>
         public static InkObject CreateClone(InkObject source)
         {
             string cloneName = $"{source.Name}_Clone";
@@ -193,6 +239,12 @@ namespace Ink
             return clone;
         }
 
+        /// <summary>
+        /// Creates a a new instance of <see cref="InkObject"/> based on the given one and sync all properties with it. 
+        /// </summary>
+        /// <param name="source">The object to be cloned and linked to</param>
+        /// <returns>A new instance of <see cref="InkObject"/>. </returns>
+        /// <exception cref="ArgumentException"></exception>
         public static InkObject CreateLinkedClone(InkObject source)
         {
             try
@@ -231,7 +283,7 @@ namespace Ink
             }
         }
 
-        protected static Dictionary<string, string> ClonePropertyValues(InkObject inkObject)
+        private static Dictionary<string, string> ClonePropertyValues(InkObject inkObject)
         {
             Dictionary<string, string> propertyValues = new(inkObject.Properties.Count);
             foreach (KeyValuePair<string, InkProperty> item in inkObject.Properties)
@@ -250,6 +302,9 @@ namespace Ink
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Name)));
             }
         }
+        /// <summary>
+        /// The horizontal coordinate. 
+        /// </summary>
         public virtual double X // 在Canvas上的横坐标
         {
             get { return ShownElement.Margin.Left; }
@@ -259,6 +314,9 @@ namespace Ink
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(X)));
             }
         }
+        /// <summary>
+        /// The vertical coordinate. 
+        /// </summary>
         public virtual double Y // 在Canvas上的纵坐标
         {
             get { return ShownElement.Margin.Top; }
@@ -295,12 +353,18 @@ namespace Ink
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Visible)));
             }
         }
+        /// <summary>
+        /// Showed to the user. This property should describe what the object is. 
+        /// </summary>
         public abstract string Type { get; }    // 并没有很大的实际意义
         public abstract Dictionary<string, InkProperty> Properties { get; }
         public abstract Dictionary<string, InkAction>? Actions { get; }
 
         protected abstract FrameworkElement ShownElement { get; }   // 实际显示出来的控件
 
+        /// <summary>
+        /// Implements <see cref="INotifyPropertyChanged"/> interface. 
+        /// </summary>
         public event PropertyChangedEventHandler? PropertyChanged;
         public event MouseButtonEventHandler? Click;    // 控件被点击时触发，通常用于通知前端获取焦点
 
@@ -378,6 +442,7 @@ namespace Ink
     {
         private readonly TextBox textBox = new() { AcceptsReturn = true };    // 在InkTextBox获得焦点时显示以直接编辑文本
         private readonly TextBlock textBlock = new();    // 无焦点时显示
+        private bool isTextBoxShown = false;
 
         public InkTextBox(string name) : base(name)
         {
@@ -418,15 +483,13 @@ namespace Ink
             textBox.SetBinding(TextBox.TextProperty, binding);
         }
 
-        private bool IsTextBoxShown { get; set; } = false;
-
         public override string Type => "Text Box";
 
         public override Dictionary<string, InkProperty> Properties { get; }
 
         public override Dictionary<string, InkAction>? Actions { get; } = null;
 
-        protected override FrameworkElement ShownElement => IsTextBoxShown ? textBox : textBlock;
+        protected override FrameworkElement ShownElement => isTextBoxShown ? textBox : textBlock;
 
         public override void AddToPage(Panel page)
         {
@@ -455,7 +518,7 @@ namespace Ink
             {
                 textBlock.Visibility = Visibility.Hidden;
                 textBox.Visibility = Visibility.Visible;
-                IsTextBoxShown = true;
+                isTextBoxShown = true;
                 textBox.Focus();
             }
             OnClick(this, e);
@@ -466,7 +529,7 @@ namespace Ink
         {
             textBlock.Visibility = Visibility.Visible;
             textBox.Visibility = Visibility.Hidden;
-            IsTextBoxShown = false;
+            isTextBoxShown = false;
         }
 
         /* 响应后台属性值的更改 */
