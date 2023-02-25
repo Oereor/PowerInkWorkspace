@@ -636,9 +636,9 @@ namespace Ink
 
         private void Button_RestorePropertyValue_Click(object sender, RoutedEventArgs e)
         {
-            if (currentObject is not null && list_Properties.SelectedItem is InkProperty selectedProperty && comboBox_PropertyValueHistory.SelectedIndex >= 0)
+            if (currentObject is not null && list_Properties.SelectedItem is InkProperty selectedProperty && comboBox_PropertyValueHistory.SelectedItem is string selectedValue)
             {
-                selectedProperty.RestoreValue(comboBox_PropertyValueHistory.SelectedIndex);
+                selectedProperty.RestoreValue(selectedValue);
             }
         }
 
@@ -773,12 +773,7 @@ namespace Ink
             if (comboBox_Objects.SelectedItem is InkObject selectedObject)
             {
                 int selectedIndex = comboBox_Objects.SelectedIndex;
-                InkObject clone = InkObject.CreateClone(selectedObject);
-                foreach (KeyValuePair<string, InkProperty> keyValuePair in clone.Properties)
-                {
-                    keyValuePair.Value.SyncValueWith(selectedObject.Properties[keyValuePair.Key], selectedObject);
-                }
-                AddNewInkObject(clone);
+                AddNewInkObject(InkObject.CreateLinkedClone(selectedObject));
                 comboBox_Objects.SelectedIndex = selectedIndex;
             }
         }
