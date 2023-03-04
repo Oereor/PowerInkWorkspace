@@ -73,7 +73,7 @@ namespace Ink
                 InkPropertyValueChanged?.Invoke(this, new InkPropertyValueChangedEventArgs(Name, Value, ValueType));
             }
         }
-        public ObservableCollection<string> ValueHistory { get; } = new();   // 用于实现回溯属性值
+        public Stack<string> ValueHistory { get; } = new();   // 用于实现回溯属性值
 
         /// <summary>
         /// The source property to sync with. 
@@ -106,7 +106,7 @@ namespace Ink
         public InkPropertyValueType ValueType { get; }
         public string DefaultValue { get; }
         /// <summary>
-        /// This property should be set only if <see cref="ValueType"/> is <see cref="InkPropertyValueType.List"/>; in other cases, just remain <see langword="null"/>. 
+        /// This property should be set only if <see cref="ValueType"/> is <see cref="InkPropertyValueType.List"/>; in other cases, just remain this <see langword="null"/>. 
         /// </summary>
         public string[]? ValueList { get; init; }   // 若ValueType是List，该列表存储给定的属性值；否则为null
         public bool ValueSyncEnabled { get; private set; }
@@ -129,12 +129,12 @@ namespace Ink
             ValueSyncEnabled = false;
         }
 
-        private void SetValue(string value, bool addToValueHistory = true)
+        private void SetValue(string value, bool addToValueHistory)
         {
             this.value = value;
             if (addToValueHistory)
             {
-                ValueHistory.Insert(0, value);
+                ValueHistory.Push(value);
             }
         }
 
