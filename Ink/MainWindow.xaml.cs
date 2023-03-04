@@ -741,7 +741,7 @@ namespace Ink
             AddNewInkObject(inkShape);
         }
 
-        private void AddNewInkObject<T>(T inkObject) where T : InkObject
+        private void AddNewInkObject<TObject>(TObject inkObject) where TObject : InkObject
         {
             currentPage.Objects.Add(inkObject);
             inkObject.AddToPage(canvas_Page);
