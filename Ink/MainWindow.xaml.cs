@@ -676,17 +676,17 @@ namespace Ink
             RemoveAllObjectsOfType<InkImageBox>();
         }
 
-        private void RemoveAllObjectsOfType<T>() where T : InkObject
+        private void RemoveAllObjectsOfType<TObject>() where TObject : InkObject
         {
-            List<T> objectTs = new();
+            List<TObject> objectTs = new();
             foreach (InkObject inkObject in currentPage.Objects)
             {
-                if (inkObject is T objectT)
+                if (inkObject is TObject objectT)
                 {
                     objectTs.Add(objectT);
                 }
             }
-            foreach (T objectT in objectTs)
+            foreach (TObject objectT in objectTs)
             {
                 RemoveObject(objectT);
             }
@@ -741,7 +741,7 @@ namespace Ink
             AddNewInkObject(inkShape);
         }
 
-        private void AddNewInkObject<T>(T inkObject) where T : InkObject
+        private void AddNewInkObject<TObject>(TObject inkObject) where TObject : InkObject
         {
             currentPage.Objects.Add(inkObject);
             inkObject.AddToPage(canvas_Page);
