@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:ColorPickerDialog"
         xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        Title="Colour" Height="480" Width="500" ResizeMode="NoResize">
+        Title="Color" Height="480" Width="500" ResizeMode="NoResize">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="2*"/>

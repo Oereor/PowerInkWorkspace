@@ -71,7 +71,7 @@
                 <Separator/>
                 <MenuItem Header="Run submitted code"/>
             </MenuItem>
-            <MenuItem Header="Colour">
+            <MenuItem Header="Color">
                 <MenuItem Header="RGB visualizer" Click="MenuItem_RGBVisualizer_Click"/>
             </MenuItem>
         </Menu>
