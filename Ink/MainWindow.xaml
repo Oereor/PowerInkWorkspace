@@ -58,6 +58,10 @@
                 <Separator/>
                 <MenuItem Header="Remove all text boxes on page" Click="MenuItem_RemoveAllTextBoxes_Click"/>
                 <MenuItem Header="Remove all image boxes on page" Click="MenuItem_RemoveAllImageBoxes_Click"/>
+                <Separator/>
+                <MenuItem Header="Pen Mode" IsCheckable="True" Click="MenuItem_PenMode_Click"/>
+                <MenuItem Header="Pen Settings" Click="MenuItem_PenSettings_Click"/>
+                <MenuItem Header="Clear Pen Strokes" Click="MenuItem_ClearPenStrokes_Click"/>
             </MenuItem>
             <MenuItem x:Name="menuItem_Property" Header="Property">
                 <MenuItem Header="View value history" Click="MenuItem_ViewValueHistory_Click"/>

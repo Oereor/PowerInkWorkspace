@@ -10,6 +10,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Ink;
 
 namespace Ink
 {
@@ -167,7 +168,12 @@ namespace Ink
 
         private void MenuItem_NewTextBox_Click(object sender, RoutedEventArgs e)
         {
+            // 获取纵横分割线交点坐标
+            double x = Canvas.GetLeft(gridSplitter_Vertical);
+            double y = Canvas.GetTop(gridSplitter_Horizontal);
             InkTextBox inkTextBox = new($"TextBox{textBoxCounter++}");
+            inkTextBox.X = x;
+            inkTextBox.Y = y;
             AddNewInkObject(inkTextBox);
         }
 
@@ -349,17 +355,10 @@ namespace Ink
         {
             if (comboBox_Objects.SelectedIndex >= 0 && currentObject is not null)
             {
-                List<InkObject> list_SyncObjects = new();
-                foreach (InkPage page in pages)
-                {
-                    foreach (InkObject inkObject in page.Objects)
-                    {
-                        if (inkObject.Type == currentObject.Type && !(inkObject == currentObject))
-                        {
-                            list_SyncObjects.Add(inkObject);
-                        }
-                    }
-                }
+                var list_SyncObjects = pages
+                    .SelectMany(page => page.Objects)
+                    .Where(inkObject => inkObject.Type == currentObject.Type && inkObject != currentObject)
+                    .ToList();
                 comboBox_SyncPropertyWithObject.ItemsSource = list_SyncObjects;
             }
         }
@@ -553,15 +552,20 @@ namespace Ink
             {
                 foreach (InkObject inkObject in page.Objects)
                 {
-                    IEnumerable<InkProperty> synchronizedProperties = from property
-                                                                      in inkObject.Properties.Values
-                                                                      where property.ValueSourceObject == objectToRemove
-                                                                      select property;
+                    var synchronizedProperties = inkObject.Properties.Values
+                        .Where(property => property.ValueSourceObject == objectToRemove);
                     foreach (InkProperty property in synchronizedProperties)
                     {
                         property.DisableValueSynchronization();
                     }
                 }
+            }
+            // 解绑事件，防止内存泄漏
+            objectToRemove.Click -= InkObject_Click;
+            objectToRemove.PropertyChanged -= InkObject_PositionChanged;
+            if (objectToRemove is InkImageBox inkImageBox)
+            {
+                inkImageBox.MouseRightButtonUp -= InkImageBox_MouseRightButtonUp;
             }
             objectToRemove.RemoveFromPage(canvas_Page);
             currentPage.Objects.Remove(objectToRemove);
@@ -606,7 +610,14 @@ namespace Ink
                 string uri = openFileDialog.FileName;
                 if (sender is InkImageBox inkImageBox)
                 {
-                    inkImageBox.Properties["ImagePath"].Value = uri;
+                    try
+                    {
+                        inkImageBox.Properties["ImagePath"].Value = uri;
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Failed to load image: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
                 }
             }
         }
@@ -678,14 +689,7 @@ namespace Ink
 
         private void RemoveAllObjectsOfType<TObject>() where TObject : InkObject
         {
-            List<TObject> objectTs = new();
-            foreach (InkObject inkObject in currentPage.Objects)
-            {
-                if (inkObject is TObject objectT)
-                {
-                    objectTs.Add(objectT);
-                }
-            }
+            var objectTs = currentPage.Objects.OfType<TObject>().ToList();
             foreach (TObject objectT in objectTs)
             {
                 RemoveObject(objectT);
@@ -775,6 +779,74 @@ namespace Ink
                 int selectedIndex = comboBox_Objects.SelectedIndex;
                 AddNewInkObject(InkObject.CreateLinkedClone(selectedObject));
                 comboBox_Objects.SelectedIndex = selectedIndex;
+            }
+        }
+
+        private bool isPenModeEnabled = false;
+        private DrawingAttributes penAttributes = new DrawingAttributes { Color = Colors.Black, Width = 2, Height = 2 };
+
+        private void MenuItem_PenMode_Click(object sender, RoutedEventArgs e)
+        {
+            isPenModeEnabled = !isPenModeEnabled;
+            if (isPenModeEnabled)
+            {
+                EnablePenMode();
+            }
+            else
+            {
+                DisablePenMode();
+            }
+        }
+
+        private void EnablePenMode()
+        {
+            if (!canvas_Page.Children.Contains(inkCanvas_Pen))
+            {
+                inkCanvas_Pen = new InkCanvas
+                {
+                    Background = Brushes.Transparent,
+                    EditingMode = InkCanvasEditingMode.Ink,
+                    DefaultDrawingAttributes = penAttributes
+                };
+                Canvas.SetZIndex(inkCanvas_Pen, 1000);
+                canvas_Page.Children.Add(inkCanvas_Pen);
+            }
+            else
+            {
+                inkCanvas_Pen.Visibility = Visibility.Visible;
+                inkCanvas_Pen.DefaultDrawingAttributes = penAttributes;
+            }
+        }
+
+        private void DisablePenMode()
+        {
+            if (inkCanvas_Pen != null)
+            {
+                inkCanvas_Pen.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private InkCanvas inkCanvas_Pen;
+
+        private void MenuItem_PenSettings_Click(object sender, RoutedEventArgs e)
+        {
+            // Show pen settings dialog
+            PenSettingsDialog dialog = new PenSettingsDialog(penAttributes);
+            if (dialog.ShowDialog() == true)
+            {
+                penAttributes = dialog.SelectedAttributes;
+                if (isPenModeEnabled && inkCanvas_Pen != null)
+                {
+                    inkCanvas_Pen.DefaultDrawingAttributes = penAttributes;
+                }
+            }
+        }
+
+        private void MenuItem_ClearPenStrokes_Click(object sender, RoutedEventArgs e)
+        {
+            if (inkCanvas_Pen != null)
+            {
+                inkCanvas_Pen.Strokes.Clear();
             }
         }
     }

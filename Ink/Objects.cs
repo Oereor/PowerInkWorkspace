@@ -68,9 +68,12 @@ namespace Ink
             get { return value; }
             set
             {
-                SetValue(value, true);
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value)));
-                InkPropertyValueChanged?.Invoke(this, new InkPropertyValueChangedEventArgs(Name, Value, ValueType));
+                if (value != this.value) // 仅在值变化时触发
+                {
+                    SetValue(value, true);
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value)));
+                    InkPropertyValueChanged?.Invoke(this, new InkPropertyValueChangedEventArgs(Name, Value, ValueType));
+                }
             }
         }
         public Stack<string> ValueHistory { get; } = new();   // 用于实现回溯属性值
@@ -265,22 +268,25 @@ namespace Ink
         protected static Color GetColourFromRgbString(string rgb)
         {
             Regex regex = RgbRegex();
-            if (rgb is not null && regex.IsMatch(rgb))
-            {
-                string[] rgbStrings = rgb.Split(',');
-                if (byte.TryParse(rgbStrings[0], out byte r) && byte.TryParse(rgbStrings[1], out byte g) && byte.TryParse(rgbStrings[2], out byte b))
-                {
-                    return Color.FromRgb(r, g, b);
-                }
-                else
-                {
-                    return Colors.Transparent;
-                }
-            }
-            else
+            if (string.IsNullOrWhiteSpace(rgb) || !regex.IsMatch(rgb))
             {
                 return Colors.Transparent;
             }
+            string[] rgbStrings = rgb.Split(',');
+            if (rgbStrings.Length != 3)
+                return Colors.Transparent;
+            try
+            {
+                if (byte.TryParse(rgbStrings[0].Trim(), out byte r) && byte.TryParse(rgbStrings[1].Trim(), out byte g) && byte.TryParse(rgbStrings[2].Trim(), out byte b))
+                {
+                    return Color.FromRgb(r, g, b);
+                }
+            }
+            catch
+            {
+                // ignore and return transparent
+            }
+            return Colors.Transparent;
         }
 
         private static Dictionary<string, string> ClonePropertyValues(InkObject inkObject)
@@ -444,25 +450,20 @@ namespace Ink
         private readonly TextBlock textBlock = new();    // 无焦点时显示
         private bool isTextBoxShown = false;
 
+        private static string[]? cachedFonts;
+
         public InkTextBox(string name) : base(name)
         {
             Properties = new Dictionary<string, InkProperty>()
             {
                 ["Text"] = new InkProperty("Text", InkPropertyValueType.Input, name),
-
                 ["Alignment"] = new InkProperty("Alignment", InkPropertyValueType.List, "Left") { ValueList = new string[] { "Left", "Right", "Center", "Justify" } },
-
                 ["TextWrapping"] = new InkProperty("TextWrapping", InkPropertyValueType.Boolean, "True"),
                 ["FontSize"] = new InkProperty("FontSize", InkPropertyValueType.Input, "18"),
-
                 ["FontFamily"] = new InkProperty("FontFamily", InkPropertyValueType.List, "Times New Roman") { ValueList = GetInstalledFonts() },
-
                 ["FontWeight"] = new InkProperty("FontWeight", InkPropertyValueType.List, "Regular") { ValueList = new string[] { "Light", "Regular", "Bold" } },
-
                 ["Italic"] = new InkProperty("Italic", InkPropertyValueType.Boolean, "False"),
-
                 ["Lines"] = new InkProperty("Lines", InkPropertyValueType.List, "NoLine") { ValueList = new string[] { "NoLine", "UnderLine", "OverLine", "Strikethrough" } },
-
                 ["Foreground"] = new InkProperty("Foreground", InkPropertyValueType.Input, "000,000,000"),
                 ["Background"] = new InkProperty("Background", InkPropertyValueType.Input, string.Empty)
             };
@@ -481,6 +482,12 @@ namespace Ink
                 UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
             };
             textBox.SetBinding(TextBox.TextProperty, binding);
+            textBlock.Text = Properties["Text"].Value;
+            // 初始化所有属性到 textBlock
+            foreach (var prop in Properties.Values)
+            {
+                Property_InkPropertyValueChanged(prop, new InkPropertyValueChangedEventArgs(prop.Name, prop.Value, prop.ValueType));
+            }
         }
 
         public override string Type => "Text Box";
@@ -496,10 +503,16 @@ namespace Ink
             page.Children.Add(textBlock);
             page.Children.Add(textBox);
             textBox.Visibility = Visibility.Hidden;
+            Canvas.SetLeft(textBlock, X);
+            Canvas.SetTop(textBlock, Y);
+            Canvas.SetLeft(textBox, X);
+            Canvas.SetTop(textBox, Y);
         }
 
         private static string[] GetInstalledFonts()
         {
+            if (cachedFonts != null)
+                return cachedFonts;
             ICollection<FontFamily> installedFonts = Fonts.SystemFontFamilies;
             string[] fonts = new string[installedFonts.Count];
             int i = 0;
@@ -508,6 +521,7 @@ namespace Ink
                 fonts[i] = fontFamily.ToString();
                 i++;
             }
+            cachedFonts = fonts;
             return fonts;
         }
 
@@ -973,14 +987,13 @@ namespace Ink
         private static (double X, double Y) GetCoordinateFromString(string coordinate)
         {
             string[] coordinates = coordinate.Split(',');
-            if (coordinates.Length == 2 && double.TryParse(coordinates[0], out double xCoordinate) && double.TryParse(coordinates[1], out double yCoordinate))
+            if (coordinates.Length == 2 &&
+                double.TryParse(coordinates[0].Trim(), out double xCoordinate) &&
+                double.TryParse(coordinates[1].Trim(), out double yCoordinate))
             {
                 return (xCoordinate, yCoordinate);
             }
-            else
-            {
-                return (514, 114);
-            }
+            return (514, 114); // 默认值
         }
     }
 
